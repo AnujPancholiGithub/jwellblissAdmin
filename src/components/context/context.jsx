@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Router, useNavigate } from "react-router-dom";
 
 const AdminContext = createContext();
-
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+console.log("API_BASE_URL:", API_BASE_URL);
 const AdminProvider = ({ children }) => {
   const [user, setUser] = useState({
     email: "TestTest@example.com",
@@ -14,6 +15,7 @@ const AdminProvider = ({ children }) => {
   const navigateTo = useNavigate();
 
   const [fetchAgain, setFetchAgain] = useState(false);
+  const [UserAgain, setUserAgain] = useState(false);
 
   useEffect(() => {
     console.log("AdminProvider: fetchAgain:", fetchAgain);
@@ -33,7 +35,7 @@ const AdminProvider = ({ children }) => {
             _id: "TestID",
           };
     });
-  }, [fetchAgain]);
+  }, [fetchAgain, UserAgain]);
 
   useEffect(() => {
     // Redirect to auth page if user is not logged in
@@ -51,6 +53,8 @@ const AdminProvider = ({ children }) => {
         setToken,
         setFetchAgain,
         fetchAgain,
+        setUserAgain,
+        API_BASE_URL,
       }}
     >
       {children}

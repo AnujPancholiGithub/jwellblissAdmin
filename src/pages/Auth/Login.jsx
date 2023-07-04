@@ -23,22 +23,22 @@ import { AdminState } from "../../components/context/context";
 import { BeatLoader } from "react-spinners";
 
 const Login = ({ setLoggedIn }) => {
-  const [mobile, setmobile] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const navigateTo = useNavigate();
-  const { user, setUserAgain } = AdminState();
+  const { user, setUserAgain, API_BASE_URL } = AdminState();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     // console.log(process.env.REACT_APP_BASE_URL);
     setLoading(true);
-    console.log("mobile:", mobile, "password:", password);
+    console.log("email:", email, "password:", password);
     try {
       const response = await axios.post(
-        `${"http://localhost:5008"}/api/auth/login`,
-        { mobile, password }
+        `${API_BASE_URL}/api/auth/admin/login`,
+        { email, password }
       );
       const { token, User } = response.data;
 
@@ -99,13 +99,13 @@ const Login = ({ setLoggedIn }) => {
             p={8}
           >
             <Stack spacing={4}>
-              <FormControl id="mobile">
+              <FormControl id="email">
                 <FormLabel>Email address</FormLabel>
                 <Input
-                  type="mobile"
+                  type="email"
                   placeholder="Email"
-                  value={mobile}
-                  onChange={(e) => setmobile(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </FormControl>
               <FormControl id="password">

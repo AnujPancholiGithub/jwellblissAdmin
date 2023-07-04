@@ -1,5 +1,18 @@
-import { Box, Button, Grid, GridItem, Spinner, Text } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Box,
+  Button,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  Image,
+  Spinner,
+  Input,
+} from "@chakra-ui/react";
 import axios from "axios";
 import UpdateProductForm from "./UpdateProduct";
 import { AdminState } from "../../context/context";
@@ -7,80 +20,137 @@ import { AdminState } from "../../context/context";
 const ProductGrid = () => {
   const [products, setProducts] = useState([]);
   const [isUpdate, setIsUpdate] = useState(false);
-  const [curentUpdateProduct, setCurentUpdateProduct] = useState({});
-  const { user, tokem, fetchAgain } = AdminState();
+  const [currentUpdateProduct, setCurrentUpdateProduct] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const { user, token, fetchAgain, API_BASE_URL } = AdminState();
+  const [error, setError] = useState(null);
+  let filteredProducts;
   useEffect(() => {
     fetchProducts();
   }, [fetchAgain]);
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(
-        "https://jwell-bliss-test-dev.cyclic.app/api/products"
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setProducts(response.data);
     } catch (error) {
       console.error("Error fetching products:", error);
+      setError(
+        (prev) =>
+          error.response.data.message ||
+          error.response.data.error ||
+          error.message ||
+          "Error while fetching products"
+      );
     }
   };
 
   const handleUpdateProduct = async (productID, product) => {
-    // Implement the logic to handle updating a product
+    //logic to handle updating a product
     console.log("Updating product:", product);
     setIsUpdate((prev) => !prev);
-    setCurentUpdateProduct(product);
+    setCurrentUpdateProduct(product);
   };
 
   const handleDeleteProduct = async (productID, product) => {
     // Implement the logic to handle deleting a product
-
     console.log("Deleting product:", productID);
   };
 
-  const containerStyle = {
-    color: "gray",
-    fontSize: "16px",
-    maxHeight: "30px", // Set the maximum height for the container
-    overflow: "hidden", // Hide the overflowed content
-    textOverflow: "ellipsis", // Add ellipsis (...) when the text overflows
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
   };
+
+  const descriptionStyle = {
+    color: "gray",
+    fontSize: "14px",
+    maxHeight: "40px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  };
+
+  filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  filteredProducts = filteredProducts.reverse();
+
+  useEffect(() => {}, []);
 
   return (
     <>
-      {products.length > 0 ? (
-        <Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={6}>
-          {products.map((product) => (
-            <GridItem key={product.id}>
-              <Box borderWidth="1px" borderRadius="md" p={4}>
-                <Text fontWeight="bold">{product.name}</Text>
-                <p style={containerStyle}>{product.description}</p>
-                <Text fontSize={"sm"}>MRP: ₹{product.mrp}</Text>
-                <Text fontWeight="bold">Website Price: ₹{product.price}</Text>
-                <Box mt={4} display={"flex"} justifyContent={"space-between"}>
-                  <UpdateProductForm
-                    key={product._id}
-                    product={product}
-                    productID={product._id}
-                  />
-                  <Button
-                    colorScheme="red"
-                    size="sm"
-                    ml={2}
-                    onClick={() => handleDeleteProduct(product._id, product)}
-                  >
-                    Delete
-                  </Button>
-                </Box>
-              </Box>
-            </GridItem>
-          ))}
-        </Grid>
+      {error ? (
+        <Box>{error}</Box>
       ) : (
         <>
-          <Box display={"flex"} m={12} justifyContent={"center"}>
-            <Spinner size={"lg"} />
-            <Text>Loading...</Text>
+          <Box mb={4} display="flex" justifyContent="flex-end">
+            <Input
+              type="text"
+              placeholder="Search by name or category"
+              value={searchTerm}
+              onChange={handleSearch}
+              maxWidth="300px"
+            />
           </Box>
+          {filteredProducts?.length > 0 ? (
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Image</Th>
+                  <Th>Name</Th>
+                  <Th>Category</Th>
+                  <Th>Description</Th>
+                  <Th isNumeric>MRP</Th>
+                  <Th isNumeric>Website Price</Th>
+                  <Th>Actions</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {filteredProducts?.map((product) => (
+                  <Tr key={product.id}>
+                    <Td>
+                      <Image width={"12"} src={product.images[0]} />
+                    </Td>
+                    <Td fontWeight="bold">{product.name}</Td>
+                    <Td>{product.category}</Td>
+                    <Td>
+                      <p style={descriptionStyle}>{product.description}</p>
+                    </Td>
+                    <Td fontSize={"sm"}>₹{product.mrp}</Td>
+                    <Td fontWeight="bold">₹{product.price}</Td>
+                    <Td>
+                      <Box display="flex" justifyContent="center">
+                        <UpdateProductForm
+                          key={product._id}
+                          product={product}
+                          productID={product._id}
+                        />
+                        {/* <Button
+                      colorScheme="red"
+                      size="sm"
+                      ml={2}
+                      onClick={() => handleDeleteProduct(product._id, product)}
+                    >
+                      Delete
+                    </Button> */}
+                      </Box>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          ) : (
+            <Box display="flex" m={12} justifyContent="center">
+              <Spinner size="lg" />
+              <Text>Loading...</Text>
+            </Box>
+          )}
         </>
       )}
     </>

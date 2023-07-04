@@ -19,11 +19,17 @@ import {
   FormErrorMessage,
   InputRightElement,
   HStack,
+  IconButton,
+  Toast,
+  Stack,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { FiUpload } from "react-icons/fi";
+import { Image as CloudImage } from "cloudinary-react";
 
 import { useToast } from "@chakra-ui/react";
 import { BeatLoader } from "react-spinners";
+import { AdminState } from "../../context/context";
 
 const Form1 = ({ productState, setProductState }) => {
   console.log(productState);
@@ -129,6 +135,142 @@ const Form2 = ({ productState, setProductState }) => {
   );
 };
 
+const ImageFormCloudinary = ({
+  productState,
+  setProductState,
+  setDisabled,
+}) => {
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [loading, setLoading] = useState(false); // For the upload button
+  const toast = useToast();
+  const handleFileChange = (event) => {
+    if (previewUrls.length >= 5) {
+      toast({
+        title: "Maximum 5 images allowed.",
+        description: "You can only upload 5 images.",
+        status: "error",
+        position: "top",
+        duration: 5000,
+        isClosable: true,
+      });
+      return; // Limit to maximum 5 files
+    }
+    const files = Array.from(event.target.files).slice(0, 5); // Limit to maximum 5 files
+    setSelectedFiles((prev) => [...prev, ...files]);
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls((prev) => [...prev, ...urls]);
+    console.log("selectedFiles", selectedFiles);
+  };
+
+  const handleUpload = async () => {
+    setDisabled((prev) => true);
+    setLoading((prev) => true);
+    // Upload logic for multiple images using Cloudinary API here
+    const uploadPromises = selectedFiles.map((file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "rteqoedcTESTER");
+
+      return fetch("https://api.cloudinary.com/v1_1/dgz92gopi/upload", {
+        method: "POST",
+        body: formData,
+      }).then((response) => response.json());
+    });
+
+    // Handle the response and any additional logic after the upload is complete for each image
+    Promise.all(uploadPromises)
+      .then((results) => {
+        const images = results.map((result) => result.secure_url);
+        setProductState((prevState) => {
+          const updatedState = { ...prevState }; // Create a shallow copy of prevState
+          updatedState.images = [...(updatedState.images || []), ...images]; // Merge images array into the "images" property
+          return updatedState;
+        });
+
+        setLoading((prev) => false);
+        setDisabled((prev) => false);
+        console.log(results);
+      })
+      .catch((error) => {
+        setLoading((prev) => false);
+        toast({
+          title: "Failed to upload images.",
+          description: `Some Error Happend : z${error}`,
+          status: "error",
+          position: "top",
+          duration: 5000,
+          isClosable: true,
+        });
+        setDisabled((prev) => false);
+        console.error(error);
+      });
+  };
+
+  return (
+    <Box>
+      <HStack>
+        {previewUrls.length > 0
+          ? previewUrls.map((url, index) => (
+              <Box>
+                <CloudImage
+                  key={index}
+                  src={url}
+                  alt={`Preview ${index + 1}`}
+                  width="200px"
+                  height="200px"
+                />{" "}
+              </Box>
+            ))
+          : null}
+      </HStack>
+
+      <Box
+        border="2px dashed"
+        borderColor="gray.300"
+        borderRadius="md"
+        p={4}
+        textAlign="center"
+      >
+        <IconButton
+          as="label"
+          htmlFor="file"
+          icon={<FiUpload />}
+          fontSize="2xl"
+          mb={2}
+        />
+        <input
+          type="file"
+          id="file"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+          multiple // Allow multiple file selection
+          accept="image/*"
+          max="5" // Limit to maximum 5 files
+        />
+        <Box>Upload up to 5 images</Box>
+      </Box>
+
+      {selectedFiles.length > 0 && (
+        <Box mt={4}>
+          <Stack direction="row" spacing={4}>
+            <Button
+              leftIcon={<FiUpload />}
+              colorScheme="pink"
+              isLoading={loading}
+              variant="solid"
+              spinner={<BeatLoader size={8} color="white" />}
+              onClick={handleUpload}
+            >
+              Upload
+            </Button>
+          </Stack>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
 const Form3 = () => {
   return (
     <>
@@ -140,11 +282,13 @@ const Form3 = () => {
 };
 
 export default function MultiStepForm() {
+  const { token, API_BASE_URL } = AdminState();
   const toast = useToast();
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(33.33);
   const [added, setAdded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [productState, setProductState] = useState({
     name: "",
     description: "",
@@ -156,16 +300,13 @@ export default function MultiStepForm() {
     size: "",
     color: "",
     error: "",
-    images: [
-      "https://example.com/images/gold-necklace.jpg",
-      "https://example.com/images/gold-necklace-2",
-    ],
+    images: [],
   });
 
-  const postProduct = async (productData, token) => {
+  const postProduct = async (productData, token, API_BASE_URL) => {
     try {
       const response = await axios.post(
-        "https://jwell-bliss-test-dev.cyclic.app/api/products",
+        `${API_BASE_URL}/api/products`,
         productData,
         {
           headers: {
@@ -206,109 +347,11 @@ export default function MultiStepForm() {
 
   const handleAddProduct = async () => {
     setLoading(true);
-    const token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRGVhbGVyIFVzZXIiLCJtb2JpbGUiOiI5ODc2NTQzMjEiLCJlbWFpbCI6ImRlYWxlcjFAZ21haWwuY29tIiwiX2lkIjoiNjQ4YzE3YjY1ZDU3Njg3MDk2NWM0Y2ZhIiwiaWF0IjoxNjg2OTAyNzY5fQ.AxCUmUVAD_l66Dd2RfBqcl9L_kEBH-rPTyTBt4BzZLk";
-    postProduct(productState, token);
+    postProduct(productState, token, API_BASE_URL);
   };
 
   return (
     <>
-      {/* //This is the original code for multistep form */}
-      {/* <Box
-        borderWidth="1px"
-        rounded="lg"
-        shadow="1px 1px 3px rgba(0,0,0,0.3)"
-        maxWidth={800}
-        p={6}
-        m="10px auto"
-        as="form"
-      >
-        <Progress
-          value={progress}
-          mb="5%"
-          size="xs"
-          colorScheme="blue"
-          mx="5%"
-          isAnimated
-        ></Progress>
-        {step === 1 ? (
-          <Form1
-            productState={productState}
-            setProductState={setProductState}
-          />
-        ) : step === 2 ? (
-          <Form2
-            productState={productState}
-            setProductState={setProductState}
-          />
-        ) : step === 3 ? (
-          <Form3
-            productState={productState}
-            setProductState={setProductState}
-          />
-        ) : (
-          <>
-            <HStack>
-              <Heading>Product Added Suceessfully</Heading>
-              <Button
-                colorScheme="blue"
-                size={"lg"}
-                onClick={(e) => {
-                  setStep((prev) => 1);
-                  setProgress(33.33);
-                }}
-              >
-                Add Another
-              </Button>
-            </HStack>
-          </>
-        )}
-        <ButtonGroup mt="5%" w="100%">
-          <Flex w="100%" justifyContent="space-between">
-            <Flex>
-              <Button
-                onClick={() => {
-                  setStep(step - 1);
-                  setProgress(progress - 33.33);
-                }}
-                isDisabled={step === 1 || step >= 3}
-                colorScheme="teal"
-                variant="solid"
-                w="7rem"
-                mr="5%"
-              >
-                Back
-              </Button>
-              <Button
-                w="7rem"
-                isDisabled={step >= 3}
-                onClick={() => {
-                  setStep(step + 1);
-                  if (step === 3) {
-                    setProgress(100);
-                  } else {
-                    setProgress(progress + 33.33);
-                  }
-                }}
-                colorScheme="teal"
-                variant="outline"
-              >
-                Next
-              </Button>
-            </Flex>
-            {step === 3 ? (
-              <Button
-                w="7rem"
-                colorScheme="red"
-                variant="solid"
-                onClick={handleAddProduct}
-              >
-                Submit
-              </Button>
-            ) : null}
-          </Flex>
-        </ButtonGroup>
-      </Box> */}
       {
         <Box>
           <Form1
@@ -319,6 +362,12 @@ export default function MultiStepForm() {
             productState={productState}
             setProductState={setProductState}
           />
+          <ImageFormCloudinary
+            productState={productState}
+            setProductState={setProductState}
+            disabled={disabled}
+            setDisabled={setDisabled}
+          />
           <Box display={"flex"} justifyContent={"center"} m={8} p={4}>
             <Button
               boxShadow={"lg"}
@@ -328,6 +377,7 @@ export default function MultiStepForm() {
               isLoading={loading}
               spinner={<BeatLoader size={8} color="white" />}
               onClick={handleAddProduct}
+              isDisabled={disabled}
             >
               Submit
             </Button>

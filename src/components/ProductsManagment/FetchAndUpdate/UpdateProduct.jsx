@@ -158,13 +158,13 @@ export default function UpdateProductForm({ product, productID }) {
   const [progress, setProgress] = useState(33.33);
   const [added, setAdded] = useState(false);
   const [productState, setProductState] = useState(product);
-  const { user, token, fetchAgain, setFetchAgain } = AdminState();
+  const { user, token, fetchAgain, setFetchAgain, API_BASE_URL } = AdminState();
   const [loading, setLoading] = useState(false);
 
   const postProduct = async (productData, token) => {
     try {
       const response = await axios.patch(
-        `https://jwell-bliss-test-dev.cyclic.app/api/products/${productID}`,
+        `${API_BASE_URL}/api/products/${productID}`,
         productData,
         {
           headers: {
@@ -206,8 +206,6 @@ export default function UpdateProductForm({ product, productID }) {
 
   const handleUpdateProduct = async () => {
     setLoading((prev) => true);
-    const token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRGVhbGVyIFVzZXIiLCJtb2JpbGUiOiI5ODc2NTQzMjEiLCJlbWFpbCI6ImRlYWxlcjFAZ21haWwuY29tIiwiX2lkIjoiNjQ4YzE3YjY1ZDU3Njg3MDk2NWM0Y2ZhIiwiaWF0IjoxNjg2OTAyNzY5fQ.AxCUmUVAD_l66Dd2RfBqcl9L_kEBH-rPTyTBt4BzZLk";
     postProduct(productState, token);
   };
 

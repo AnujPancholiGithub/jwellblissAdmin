@@ -8,7 +8,7 @@ const ProjectManagement = () => {
   const outlet = useOutlet();
 
   return (
-    <Tabs defaultIndex={location.pathname !== "/products" ? 1 : 0}>
+    <Tabs defaultIndex={location.pathname !== "/products" ? 0 : 1}>
       <TabList>
         <Tab>
           <Link>All Products</Link>

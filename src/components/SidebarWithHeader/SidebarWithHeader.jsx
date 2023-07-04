@@ -43,7 +43,7 @@ const LinkItems = [
   { name: "Orders", icon: FiTrendingUp, link: "/orders" },
 ];
 
-export default function SidebarWithHeader({ children }) {
+export default function SidebarWithHeader({ children, setLoggedIn }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <Box minH="100vh" bg={useColorModeValue("white", "gray.900")}>
@@ -65,7 +65,7 @@ export default function SidebarWithHeader({ children }) {
         </DrawerContent>
       </Drawer>
       {/* mobilenav */}
-      <MobileNav onOpen={onOpen} />
+      <MobileNav setLoggedIn={setLoggedIn} onOpen={onOpen} />
       <Box ml={{ base: 0, md: 60 }} p="4">
         {children}
       </Box>
@@ -78,9 +78,9 @@ const SidebarContent = ({ onClose, ...rest }) => {
 
   return (
     <Box
-      color={useColorModeValue("black", "white")}
+      color={useColorModeValue("white", "white")}
       transition="3s ease"
-      bg={useColorModeValue("gray.200", "gray.900")}
+      bg={useColorModeValue("gray.800", "gray.900")}
       borderRight="1px"
       borderRightColor={useColorModeValue("gray.200", "gray.700")}
       w={{ base: "full", md: 60 }}
@@ -144,8 +144,9 @@ const NavItem = ({ icon, linkTo, children, ...rest }) => {
   );
 };
 
-const MobileNav = ({ onOpen, ...rest }) => {
+const MobileNav = ({ onOpen, setLoggedIn, ...rest }) => {
   const { user, token } = AdminState();
+  const navigateTo = useNavigate();
   console.log(user);
   return (
     <Flex
@@ -153,7 +154,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
       px={{ base: 4, md: 4 }}
       height="20"
       alignItems="center"
-      bg={useColorModeValue("gray.200", "gray.900")}
+      bg={useColorModeValue("gray.700", "gray.900")}
       borderBottomWidth="1px"
       borderBottomColor={useColorModeValue("gray.200", "gray.700")}
       justifyContent={{ base: "space-between", md: "flex-end" }}
@@ -190,7 +191,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
               transition="all 0.3s"
               _focus={{ boxShadow: "none" }}
             >
-              <HStack>
+              <HStack color={"white"}>
                 <Avatar
                   size={"sm"}
                   src={
@@ -203,7 +204,9 @@ const MobileNav = ({ onOpen, ...rest }) => {
                   spacing="1px"
                   ml="2"
                 >
-                  <Text fontSize="sm">{user.name}</Text>
+                  <Text fontSize="sm" color={"white"}>
+                    {user.name}
+                  </Text>
                   <Text fontSize="xs" color="white">
                     {user.role || user.email}
                   </Text>
@@ -224,6 +227,8 @@ const MobileNav = ({ onOpen, ...rest }) => {
                 <Button
                   onClick={() => {
                     localStorage.clear();
+                    setLoggedIn((prev) => !prev);
+                    navigateTo("/auth");
                   }}
                 >
                   SignOut
