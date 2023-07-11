@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Progress,
   Box,
@@ -22,14 +22,17 @@ import {
   IconButton,
   Toast,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { FiUpload } from "react-icons/fi";
+import { FiCrosshair, FiUpload } from "react-icons/fi";
+import { ImCross } from "react-icons/im";
 import { Image as CloudImage } from "cloudinary-react";
 
 import { useToast } from "@chakra-ui/react";
 import { BeatLoader } from "react-spinners";
 import { AdminState } from "../../context/context";
+import { Form } from "react-router-dom";
 
 const Form1 = ({ productState, setProductState }) => {
   console.log(productState);
@@ -43,43 +46,50 @@ const Form1 = ({ productState, setProductState }) => {
 
   return (
     <>
-      <Heading w="100%" textAlign="center" fontWeight="normal" mb="2%">
-        Add a new Product
-      </Heading>
-      <Flex>
+      <Flex fontSize={"sm"}>
         <FormControl mr="5%">
-          <FormLabel>Product Name</FormLabel>
+          <FormLabel fontSize={"x-small"}>Product Name</FormLabel>
           <Input
+            fontSize={"x-small"}
             name="name"
             value={productState.name}
             onChange={handleChange}
             placeholder="Enter product name"
           />
-          <FormLabel mt={4}>Description</FormLabel>
+          {/* Description commented here this time it not neeeded might be needed later on */}
+          {/* <FormLabel fontSize={"x-small"} mt={4}>
+            Description
+          </FormLabel>
           <Textarea
             name="description"
             value={productState.description}
             onChange={handleChange}
             placeholder="Enter product description"
-          />
+          /> */}
         </FormControl>
 
-        <FormControl>
-          <FormLabel mt={4}>MRP</FormLabel>
+        {/* <FormControl>
+          <FormLabel fontSize={"x-small"} mt={4}>
+            MRP
+          </FormLabel>
           <Input
+            fontSize={"x-small"}
             name="mrp"
             value={productState.mrp}
             onChange={handleChange}
             placeholder="Enter product MRP"
           />
-          <FormLabel mt={4}>Price</FormLabel>
+          <FormLabel fontSize={"x-small"} mt={4}>
+            Price
+          </FormLabel>
           <Input
+            fontSize={"x-small"}
             name="price"
             value={productState.price}
             onChange={handleChange}
             placeholder="(It will be displayed on the website)"
           />
-        </FormControl>
+        </FormControl> */}
       </Flex>
       <FormControl mt="2%" />
     </>
@@ -87,6 +97,10 @@ const Form1 = ({ productState, setProductState }) => {
 };
 
 const Form2 = ({ productState, setProductState }) => {
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(""); // Initialize with default selected category if needed
+
+  const { API_BASE_URL } = AdminState();
   const handleChange = (event, property) => {
     console.log(productState);
     const { value } = event.target;
@@ -96,39 +110,157 @@ const Form2 = ({ productState, setProductState }) => {
     }));
   };
 
+  const handleChange2 = (event) => {
+    const { name, value } = event.target;
+    setProductState((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  useEffect(() => {
+    //get all categories
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/products/categories`
+        );
+        console.log("response.data", response.data);
+        setCategories(response.data);
+      } catch (error) {
+        console.error("error-> ", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+    setProductState((prevState) => {
+      return {
+        ...prevState,
+        category: event.target.value,
+      };
+    });
+  };
+
   return (
     <>
       <FormControl as={GridItem} colSpan={[6, 3]}>
-        <FormLabel mt={4}>Category</FormLabel>
-        <Input
-          value={productState.category}
-          onChange={(e) => handleChange(e, "category")}
-          placeholder="Enter product category"
-        />
-        <FormLabel mt={4}>Brand</FormLabel>
-        <Input
-          value={productState.brand}
-          onChange={(e) => handleChange(e, "brand")}
-          placeholder="Enter product brand"
-        />
-        <FormLabel mt={4}>Material</FormLabel>
-        <Input
-          value={productState.material}
-          onChange={(e) => handleChange(e, "material")}
-          placeholder="Enter product material"
-        />
-        <FormLabel mt={4}>Size</FormLabel>
-        <Input
-          value={productState.size}
-          onChange={(e) => handleChange(e, "size")}
-          placeholder="Enter product size"
-        />
-        <FormLabel mt={4}>Color</FormLabel>
-        <Input
-          value={productState.color}
-          onChange={(e) => handleChange(e, "color")}
-          placeholder="Enter product color"
-        />
+        <FormLabel fontSize={"x-small"}>Category</FormLabel>
+        <HStack
+          // bg={"red"}
+          display={"flex"}
+          width={"100%"}
+          alignItems={"baseline"}
+          mb={-8}
+        >
+          <Select
+            flex={4}
+            mb={4}
+            fontSize={"x-small"}
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+          >
+            <option value="">Select a category</option>
+            {categories.map((category, index) => (
+              <option key={index} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </Select>
+          <Text fontSize={"x-small"}>or</Text>
+          <Box flex={4}>
+            <Input
+              mt={4}
+              isDisabled={selectedCategory !== ""}
+              fontSize={"x-small"}
+              value={productState.category}
+              onChange={(e) => handleChange(e, "category")}
+              placeholder="Enter product category"
+            />
+          </Box>
+        </HStack>
+        <Flex
+          margin={"auto"}
+          ml={-2}
+          width={"100%"}
+          wrap={"wrap"}
+          m={8}
+          alignItems={"baseline"}
+        >
+          {/* Brand is commented because this time not needed might be needed later on */}
+          {/* <FormControl fontSize={"x-small"} width={"50%"} p={2}>
+            <FormLabel fontSize={"x-small"} mt={4}>
+              Brand
+            </FormLabel>
+            <Input
+              value={productState.brand}
+              onChange={(e) => handleChange(e, "brand")}
+              placeholder="Enter product brand"
+            />
+          </FormControl> */}
+          <FormControl width={"50%"} p={2}>
+            <FormLabel fontSize={"x-small"} mt={4}>
+              Material
+            </FormLabel>
+            <Input
+              fontSize={"x-small"}
+              value={productState.material}
+              onChange={(e) => handleChange(e, "material")}
+              placeholder="Enter product material"
+            />
+          </FormControl>
+          <FormControl width={"50%"} p={2}>
+            <FormLabel fontSize={"x-small"} mt={4}>
+              Weight
+            </FormLabel>
+            <Input
+              fontSize={"x-small"}
+              value={productState.size}
+              onChange={(e) => handleChange(e, "weight")}
+              placeholder="Enter product size"
+            />
+          </FormControl>
+          {/* Color is commented because this time not needed might be needed later on */}
+          {/* <FormControl width={"50%"} p={2}>
+            <FormLabel fontSize={"x-small"} mt={4}>
+              Color
+            </FormLabel>
+            <Input
+              fontSize={"x-small"}
+              value={productState.color}
+              onChange={(e) => handleChange(e, "color")}
+              placeholder="Enter product color"
+            />
+          </FormControl> */}
+          <FormControl width={"50%"} p={2}>
+            <FormLabel fontSize={"x-small"} mt={4}>
+              MRP
+            </FormLabel>
+            <Input
+              fontSize={"x-small"}
+              name="mrp"
+              value={productState.mrp}
+              onChange={handleChange2}
+              placeholder="Enter product MRP"
+            />
+          </FormControl>
+          <FormControl width={"50%"} p={2}>
+            <FormLabel fontSize={"x-small"} mt={4}>
+              Price
+            </FormLabel>
+            <Input
+              fontSize={"x-small"}
+              name="price"
+              value={productState.price}
+              onChange={handleChange2}
+              placeholder="(It will be displayed on the website)"
+            />
+          </FormControl>
+        </Flex>
+
         <FormErrorMessage>{productState.error}</FormErrorMessage>
       </FormControl>
     </>
@@ -157,6 +289,7 @@ const ImageFormCloudinary = ({
       return; // Limit to maximum 5 files
     }
     const files = Array.from(event.target.files).slice(0, 5); // Limit to maximum 5 files
+    console.log("filehereeeee-> ", files);
     setSelectedFiles((prev) => [...prev, ...files]);
     const urls = files.map((file) => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...urls]);
@@ -169,13 +302,25 @@ const ImageFormCloudinary = ({
     // Upload logic for multiple images using Cloudinary API here
     const uploadPromises = selectedFiles.map((file) => {
       const formData = new FormData();
+      console.log("file--->", file);
       formData.append("file", file);
-      formData.append("upload_preset", "rteqoedcTESTER");
-
-      return fetch("https://api.cloudinary.com/v1_1/dgz92gopi/upload", {
-        method: "POST",
-        body: formData,
-      }).then((response) => response.json());
+      formData.append(
+        "upload_preset",
+        import.meta.env.VITE_APP_CL_MAIN_UPLOAD_PRESET
+      );
+      console.log(
+        "upload_preset",
+        import.meta.env.VITE_APP_CL_MAIN_UPLOAD_PRESET
+      );
+      return fetch(
+        `https://api.cloudinary.com/v1_1/${
+          import.meta.env.VITE_APP_CL_MAIN_CLOUDNAME
+        }/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      ).then((response) => response.json());
     });
 
     // Handle the response and any additional logic after the upload is complete for each image
@@ -213,6 +358,21 @@ const ImageFormCloudinary = ({
         {previewUrls.length > 0
           ? previewUrls.map((url, index) => (
               <Box>
+                <IconButton
+                  position={"sticky"}
+                  onClick={(e) => {
+                    console.log("Clicked", url);
+                    const newPreviewUrls = previewUrls.filter((url, i) => {
+                      return i !== index;
+                    });
+                    console.log(selectedFiles, previewUrls);
+
+                    setPreviewUrls((prev) => [...newPreviewUrls]);
+                    setSelectedFiles((prev) => [...newPreviewUrls]);
+                    console.log("newPreviewUrls", newPreviewUrls);
+                  }}
+                  icon={<ImCross />}
+                ></IconButton>
                 <CloudImage
                   key={index}
                   src={url}
@@ -288,7 +448,7 @@ export default function MultiStepForm() {
   const [progress, setProgress] = useState(33.33);
   const [added, setAdded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [disabled, setDisabled] = useState(false);
+  const [disabled, setDisabled] = useState(true);
   const [productState, setProductState] = useState({
     name: "",
     description: "",
@@ -298,6 +458,7 @@ export default function MultiStepForm() {
     brand: "",
     material: "",
     size: "",
+    weight: "",
     color: "",
     error: "",
     images: [],
@@ -353,7 +514,7 @@ export default function MultiStepForm() {
   return (
     <>
       {
-        <Box>
+        <Box fontSize={"sm"}>
           <Form1
             productState={productState}
             setProductState={setProductState}

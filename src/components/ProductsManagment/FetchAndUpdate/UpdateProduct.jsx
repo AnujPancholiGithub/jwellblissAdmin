@@ -27,7 +27,9 @@ import {
   ModalBody,
   ModalFooter,
   ModalCloseButton,
+  Icon,
 } from "@chakra-ui/react";
+import { BiEdit } from "react-icons/bi";
 import { BeatLoader } from "react-spinners";
 import axios from "axios";
 import { AdminState } from "../../context/context";
@@ -108,7 +110,7 @@ const Form2 = ({ productState, setProductState }) => {
       <FormControl as={GridItem} colSpan={[6, 3]}>
         <FormLabel mt={4}>Category</FormLabel>
         <Input
-          value={productState.category}
+          value={productState.category?.name}
           onChange={(e) => handleChange(e, "category")}
           placeholder="Enter product category"
         />
@@ -124,11 +126,11 @@ const Form2 = ({ productState, setProductState }) => {
           onChange={(e) => handleChange(e, "material")}
           placeholder="Enter product material"
         />
-        <FormLabel mt={4}>Size</FormLabel>
+        <FormLabel mt={4}>Weight</FormLabel>
         <Input
-          value={productState.size}
-          onChange={(e) => handleChange(e, "size")}
-          placeholder="Enter product size"
+          value={productState.weight}
+          onChange={(e) => handleChange(e, "weight")}
+          placeholder="Enter product weight"
         />
         <FormLabel mt={4}>Color</FormLabel>
         <Input
@@ -177,8 +179,8 @@ export default function UpdateProductForm({ product, productID }) {
       console.log("Post request successful:", response.data);
 
       toast({
-        title: "Product Added Successfully.",
-        description: "We've created your product for you.",
+        title: "Updated",
+        description: "Updated Product Successfully.",
         status: "success",
         position: "top",
         duration: 5000,
@@ -226,7 +228,7 @@ export default function UpdateProductForm({ product, productID }) {
           isLoading={loading}
           spinner={<BeatLoader size={8} color="white" />}
         >
-          Update
+          <Icon as={BiEdit} />
         </Button>
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />

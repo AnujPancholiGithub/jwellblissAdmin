@@ -3,7 +3,8 @@ import { Router, useNavigate } from "react-router-dom";
 
 const AdminContext = createContext();
 const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
-console.log("API_BASE_URL:", API_BASE_URL);
+const API_LOCAL_URL = import.meta.env.VITE_APP_API_LOCAL_URL;
+console.log("API_BASE_URL:", API_BASE_URL, API_LOCAL_URL);
 const AdminProvider = ({ children }) => {
   const [user, setUser] = useState({
     email: "TestTest@example.com",
@@ -13,9 +14,16 @@ const AdminProvider = ({ children }) => {
   });
   const [token, setToken] = useState("TestToken");
   const navigateTo = useNavigate();
-
+  const [loadingState, setLoadingState] = useState(false);
   const [fetchAgain, setFetchAgain] = useState(false);
   const [UserAgain, setUserAgain] = useState(false);
+
+  useEffect(() => {
+    // Redirect to auth page if user is not logged in
+    if (!user) {
+      navigateTo("/auth");
+    }
+  }, [user, token]);
 
   useEffect(() => {
     console.log("AdminProvider: fetchAgain:", fetchAgain);
@@ -37,16 +45,11 @@ const AdminProvider = ({ children }) => {
     });
   }, [fetchAgain, UserAgain]);
 
-  useEffect(() => {
-    // Redirect to auth page if user is not logged in
-    if (!user) {
-      navigateTo("/auth");
-    }
-  }, [navigateTo, user]);
-
   return (
     <AdminContext.Provider
       value={{
+        loadingState,
+        setLoadingState,
         user,
         setUser,
         token,
@@ -55,6 +58,7 @@ const AdminProvider = ({ children }) => {
         fetchAgain,
         setUserAgain,
         API_BASE_URL,
+        API_LOCAL_URL,
       }}
     >
       {children}

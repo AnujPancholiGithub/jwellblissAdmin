@@ -3,6 +3,7 @@ import { Box, Flex, Text, SimpleGrid, Spinner } from "@chakra-ui/react";
 import axios from "axios";
 import { SpinnerIcon } from "@chakra-ui/icons";
 import { AdminState } from "../context/context";
+import BasicStatistics from "./DashCards";
 const DashboardCard = ({ title, value }) => {
   return (
     <Box p={4} borderRadius="md" boxShadow="lg" bg="white" textAlign="center">
@@ -21,7 +22,8 @@ const HomeDashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [error, setError] = useState(null);
-  const { user, token, API_BASE_URL } = AdminState();
+  const { user, token, API_BASE_URL, loadingState, setLoadingState } =
+    AdminState();
   console.log("API_BASE_URLHome:", API_BASE_URL);
 
   useEffect(() => {
@@ -40,6 +42,7 @@ const HomeDashboard = () => {
         setTotalRevenue(tr);
         console.log("tr:", tr);
         setTotalOrders(response.data.length);
+        setError(null);
       } catch (error) {
         console.error("error-> ", error);
         setError(
@@ -53,7 +56,7 @@ const HomeDashboard = () => {
     };
 
     fetchOrders();
-  }, []);
+  }, [loadingState]);
 
   useEffect(() => {
     // console.log("processssss", import.meta.env.VITE_APP_BASE_URL);
@@ -65,6 +68,7 @@ const HomeDashboard = () => {
           },
         });
         setTotalUsers(response.data.length);
+        setError(null);
       } catch (error) {
         console.error("error-> ", error);
         setError(
@@ -78,7 +82,7 @@ const HomeDashboard = () => {
     };
 
     fetchNewUsers();
-  }, []);
+  }, [loadingState]);
 
   const getTotalProducts = async () => {
     try {
@@ -89,6 +93,7 @@ const HomeDashboard = () => {
       });
       const totalProducts = response.data.length;
       console.log(totalProducts);
+      setError(null);
       return totalProducts;
     } catch (error) {
       console.error("error-> ", error);
@@ -108,23 +113,32 @@ const HomeDashboard = () => {
       console.log("totalProducts:", tp);
     };
     ex();
+  }, [loadingState]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoadingState((prev) => true);
+    }, 2000);
   }, [token]);
 
+  console.log("loadingState2", loadingState);
   return (
     <>
-      {error ? (
+      {!loadingState ? (
+        <Box> Loading... {console.log("loadingState", loadingState)} </Box>
+      ) : error ? (
         <>
           <Box>{error}</Box>
         </>
       ) : (
-        <Flex justify="center" align="center">
+        <>
           {totalUsers && totalOrders ? (
-            <SimpleGrid columns={[1, 2, 4]} spacing={4}>
-              <DashboardCard title="Total Products" value={totalProducts} />
-              <DashboardCard title="Total Users" value={totalUsers} />
-              <DashboardCard title="Total Orders" value={totalOrders} />
-              <DashboardCard title="Gross Revenue" value={"₹" + totalRevenue} />
-            </SimpleGrid>
+            <BasicStatistics
+              totalOrders={totalOrders}
+              totalUsers={totalUsers}
+              totalProducts={totalProducts}
+              totalRevenue={totalRevenue}
+            />
           ) : (
             <>
               <Box display="flex" justifyContent="center" mt={48}>
@@ -132,8 +146,8 @@ const HomeDashboard = () => {
               </Box>
             </>
           )}
-        </Flex>
-      )}{" "}
+        </>
+      )}
     </>
   );
 };

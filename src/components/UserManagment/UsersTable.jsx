@@ -67,7 +67,7 @@ const UserTable = () => {
               <Th>Created At</Th>
             </Tr>
           </Thead>
-          <Tbody>
+          <Tbody fontSize={"x-small"}>
             {users.map((user) => (
               <Tr key={user._id}>
                 <Td>{user.name}</Td>

@@ -233,7 +233,7 @@ const OrdersTable = () => {
               fontSize="small"
               key={order._id}
             >
-              <Td>{order.user.name}</Td>
+              <Td>{order.user?.name}</Td>
               <Td>{order.address ? order.address.addressLine : "-"}</Td>
               <Td>
                 <Box>
@@ -285,6 +285,8 @@ const OrdersTable = () => {
     <>
       <Box my={4} display="flex">
         <Input
+          maxW={"20%"}
+          mr={2}
           value={searchTerm}
           placeholder="Search Order"
           onChange={(e) => {

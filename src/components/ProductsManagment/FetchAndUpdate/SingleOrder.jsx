@@ -85,9 +85,9 @@ const OrderDetails = () => {
               <Text style={{ color: getColor() }} fontWeight="bold">
                 Status: {status}
               </Text>
-              <Text fontWeight="bold">User: {user.name}</Text>
-              <Text fontWeight="bold">Email: {user.email}</Text>
-              <Text fontWeight="bold">Mobile: {user.mobile}</Text>
+              <Text fontWeight="bold">User: {user?.name}</Text>
+              <Text fontWeight="bold">Email: {user?.email}</Text>
+              <Text fontWeight="bold">Mobile: {user?.mobile}</Text>
             </CardBody>
           </Card>
 
@@ -102,9 +102,11 @@ const OrderDetails = () => {
                   <GridItem key={item._id}>
                     <Card>
                       <CardBody>
-                        <Text fontWeight="bold">Name: {item.product.name}</Text>
-                        <Text>Price: {item.product.price}</Text>
-                        <Text>Quantity: {item.quantity}</Text>
+                        <Text fontWeight="bold">
+                          Name: {item.product?.name}
+                        </Text>
+                        <Text>Price: {item.product?.price}</Text>
+                        <Text>Quantity: {item.quantity || "0"}</Text>
                       </CardBody>
                     </Card>
                   </GridItem>

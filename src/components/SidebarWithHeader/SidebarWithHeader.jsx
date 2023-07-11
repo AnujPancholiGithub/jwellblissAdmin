@@ -31,6 +31,8 @@ import {
   FiMenu,
   FiBell,
   FiChevronDown,
+  FiUserPlus,
+  FiList,
 } from "react-icons/fi";
 import { Link as RouteLink, useNavigate } from "react-router-dom";
 import { MdShoppingCartCheckout } from "react-icons/md";
@@ -39,8 +41,9 @@ import { AdminState } from "../context/context";
 const LinkItems = [
   { name: "Home", icon: FiHome, link: "/" },
   { name: "Products", icon: MdShoppingCartCheckout, link: "/products" },
-  { name: "Customers", icon: FiTrendingUp, link: "/Customers" },
+  { name: "Dealers", icon: FiTrendingUp, link: "/dealers" },
   { name: "Orders", icon: FiTrendingUp, link: "/orders" },
+  { name: "SalesPerson", icon: FiUserPlus, link: "/salesperson" },
 ];
 
 export default function SidebarWithHeader({ children, setLoggedIn }) {
@@ -122,10 +125,10 @@ const NavItem = ({ icon, linkTo, children, ...rest }) => {
         borderRadius="lg"
         role="group"
         cursor="pointer"
-        _hover={{
-          bg: "cyan.400",
-          color: "white",
-        }}
+        // _hover={{
+        //   bg: "cyan.400",
+        //   color: "white",
+        // }}
         {...rest}
       >
         {icon && (
