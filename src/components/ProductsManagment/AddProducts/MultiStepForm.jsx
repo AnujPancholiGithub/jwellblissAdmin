@@ -99,7 +99,7 @@ const Form1 = ({ productState, setProductState }) => {
 const Form2 = ({ productState, setProductState }) => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(""); // Initialize with default selected category if needed
-
+  const weightOptions = ["18", "20", "22", "24"];
   const { API_BASE_URL } = AdminState();
   const handleChange = (event, property) => {
     console.log(productState);
@@ -216,12 +216,18 @@ const Form2 = ({ productState, setProductState }) => {
             <FormLabel fontSize={"x-small"} mt={4}>
               Weight
             </FormLabel>
-            <Input
+            <Select
               fontSize={"x-small"}
-              value={productState.size}
+              value={productState.weight}
               onChange={(e) => handleChange(e, "weight")}
-              placeholder="Enter product size"
-            />
+              placeholder="Select product weight"
+            >
+              {weightOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </Select>
           </FormControl>
           {/* Color is commented because this time not needed might be needed later on */}
           {/* <FormControl width={"50%"} p={2}>

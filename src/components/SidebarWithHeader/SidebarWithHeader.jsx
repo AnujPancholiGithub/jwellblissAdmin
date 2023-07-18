@@ -35,15 +35,16 @@ import {
   FiList,
 } from "react-icons/fi";
 import { Link as RouteLink, useNavigate } from "react-router-dom";
-import { MdShoppingCartCheckout } from "react-icons/md";
+import { MdShoppingCartCheckout, MdPriceChange } from "react-icons/md";
 import { AdminState } from "../context/context";
 
 const LinkItems = [
   { name: "Home", icon: FiHome, link: "/" },
-  { name: "Products", icon: MdShoppingCartCheckout, link: "/products" },
-  { name: "Dealers", icon: FiTrendingUp, link: "/dealers" },
-  { name: "Orders", icon: FiTrendingUp, link: "/orders" },
-  { name: "SalesPerson", icon: FiUserPlus, link: "/salesperson" },
+  { name: "Manage Products", icon: MdShoppingCartCheckout, link: "/products" },
+  { name: "Manage Dealers", icon: FiTrendingUp, link: "/dealers" },
+  { name: "Manage Orders", icon: FiTrendingUp, link: "/orders" },
+  { name: "Manage Sales Person", icon: FiUserPlus, link: "/salesperson" },
+  { name: "Manage Coins", icon: MdPriceChange, link: "/pricetable" },
 ];
 
 export default function SidebarWithHeader({ children, setLoggedIn }) {
@@ -102,7 +103,12 @@ const SidebarContent = ({ onClose, ...rest }) => {
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} linkTo={link.link} icon={link.icon}>
+        <NavItem
+          fontSize={"15px"}
+          key={link.name}
+          linkTo={link.link}
+          icon={link.icon}
+        >
           {link.name}
         </NavItem>
       ))}

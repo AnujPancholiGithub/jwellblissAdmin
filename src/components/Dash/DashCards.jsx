@@ -66,7 +66,7 @@ export default function BasicStatistics({
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: 5, lg: 8 }}>
         <StatsCard
           title={"Users"}
-          link={"/Customers"}
+          link={"/dealers"}
           stat={totalUsers}
           icon={<BsPerson size={"3em"} />}
         />

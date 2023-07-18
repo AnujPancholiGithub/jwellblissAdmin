@@ -15,6 +15,7 @@ import RegisterForm from "./components/he/SalespersonRegister";
 import TabsSalesPerson from "./components/he/TabsSalesPerson";
 import UpdatePerson from "./components/he/UpdatePerson";
 import SinglePerson from "./components/he/SinglePerson";
+import GoldPriceTable from "./components/Charts/GoldTable";
 
 function App() {
   const [initialLoad, setInitialLoad] = useState(true);
@@ -59,6 +60,7 @@ function App() {
                       path="/salesperson/:personId"
                       element={<SinglePerson />}
                     />
+                    {/* <Route path="/pricetable" element={<GoldPriceTable />} /> */}
                   </>
                 ) : (
                   <>
